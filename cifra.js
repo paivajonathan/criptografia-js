@@ -63,6 +63,7 @@ function decifrar(chave, textoCifrado) {
       [codigoA, codigoZ] = [CODIGO_A_MAI, CODIGO_Z_MAI];
 
     const codigoDeslocado = letra.charCodeAt(0) - ALFABETO_MIN.indexOf(chave.toLowerCase());
+    
     const codigo = codigoDeslocado < codigoA ? (codigoZ + 1) - (codigoA % codigoDeslocado) : codigoDeslocado;
 
     const letraModificada = String.fromCharCode(codigo);
