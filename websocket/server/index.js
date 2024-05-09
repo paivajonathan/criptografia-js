@@ -8,26 +8,35 @@ const server = http.createServer();
 const wsServer = new WebSocketServer({ server });
 const port = 8000;
 
+const MAX_CONNECTIONS = 2;
 const connections = {};
-const users = {};
 
 wsServer.on("connection", (connection, request) => {
+    if (Object.keys(connections).length >= MAX_CONNECTIONS) {
+        connection.close();
+        return;
+    }
+
     const { username } = url.parse(request.url, true).query;
     const uuid = uuidv4();
-    console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`)
-
+    
     connections[uuid] = connection;
-    users[uuid] = {
-        username: username,
-        state: {x: 0, y: 0},
-    };
+    
+    console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`)
 
     connection.on("message", (message) => {
         console.log(`Usuário: ${username} enviou ${message.toString()}`);
+
+        Object.keys(connections).forEach((id) => {
+            if (uuid === id) return;
+            const connection = connections[id];
+            connection.send(`${username}: "${message.toString()}"`);
+        });
     });
     
     connection.on("close", (code, reason) => {
-        console.log(code, reason.toString(), "Deslogado");
+        console.log(`Usuário ${username} se deslogou.`);
+        delete connections[uuid];
     });
 });
 
