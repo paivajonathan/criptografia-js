@@ -4,6 +4,8 @@ const { WebSocketServer } = require("ws");
 const url = require("url");
 const uuidv4 = require("uuid").v4;
 
+const { faker } = require('@faker-js/faker');
+
 const server = http.createServer();
 const wsServer = new WebSocketServer({ server });
 const port = 8000;
@@ -17,7 +19,7 @@ wsServer.on("connection", (connection, request) => {
         return;
     }
 
-    const { username } = url.parse(request.url, true).query;
+    const username = url.parse(request.url, true).query.username || faker.person.fullName();
     const uuid = uuidv4();
     
     connections[uuid] = connection;
@@ -25,17 +27,22 @@ wsServer.on("connection", (connection, request) => {
     console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`);
 
     connection.on("message", (message) => {
-        console.log(`Usuário: ${username} enviou ${message.toString()}`);
+        console.log(`${username} enviou ${message.toString()}`);
 
         Object.keys(connections).forEach((id) => {
-            if (uuid === id) return;
             const connection = connections[id];
-            connection.send(`${username}: "${message.toString()}"`);
+            connection.send(`${username}: ${message.toString()}`);
         });
     });
     
     connection.on("close", (code, reason) => {
         console.log(`Usuário ${username} se deslogou.`);
+
+        Object.keys(connections).forEach((id) => {
+            const connection = connections[id];
+            connection.send(`Log off: ${username}`);
+        });
+
         delete connections[uuid];
     });
 });
