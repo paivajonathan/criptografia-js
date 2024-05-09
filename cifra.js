@@ -25,7 +25,7 @@ function cifrar(chave, texto) {
     codigo = codigo > CODIGO_Z ? (codigo % (CODIGO_Z + 1)) + CODIGO_A : codigo;
     
     const letraModificada = String.fromCharCode(codigo);
-   
+
     textoCifrado += letraModificada;
   }
 
