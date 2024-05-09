@@ -1,6 +1,8 @@
-const CODIGO_A = 97;
-const CODIGO_Z = 122;
-const alfabeto = 'abcdefghijklmnopqrstuvwxyz';
+const [CODIGO_A_MIN, CODIGO_Z_MIN] = [97, 122]; 
+const [CODIGO_A_MAI, CODIGO_Z_MAI] = [65, 90];
+
+const ALFABETO_MIN = 'abcdefghijklmnopqrstuvwxyz';
+const ALFABETO_MAI = ALFABETO_MIN.toUpperCase();
 
 /**
  * @param {string} chave 
@@ -8,21 +10,25 @@ const alfabeto = 'abcdefghijklmnopqrstuvwxyz';
  * @returns texto cifrado
  */
 function cifrar(chave, texto) {
-  if (texto.match(new RegExp('[^a-zA-Z ]'))) {
-    console.log('Cheque seu texto!');
-    return '';
-  }
-
   let textoCifrado = '';
+  let codigoA = 0;
+  let codigoZ = 0;
 
   for (let letra of texto) {
-    if (!letra.trim()) {
+    if (!ALFABETO_MIN.includes(letra.toLowerCase())) {
       textoCifrado += letra;
       continue;
     }
 
-    let codigo = letra.charCodeAt(0) + alfabeto.indexOf(chave);
-    codigo = codigo > CODIGO_Z ? (codigo % (CODIGO_Z + 1)) + CODIGO_A : codigo;
+    if (ALFABETO_MIN.includes(letra))
+      [codigoA, codigoZ] = [CODIGO_A_MIN, CODIGO_Z_MIN];
+
+    if (ALFABETO_MAI.includes(letra))
+      [codigoA, codigoZ] = [CODIGO_A_MAI, CODIGO_Z_MAI];
+
+    const codigoDeslocado = letra.charCodeAt(0) + ALFABETO_MIN.indexOf(chave.toLowerCase());
+    
+    const codigo = codigoDeslocado > codigoZ ? (codigoDeslocado % (codigoZ + 1)) + codigoA : codigoDeslocado;
     
     const letraModificada = String.fromCharCode(codigo);
 
@@ -32,7 +38,7 @@ function cifrar(chave, texto) {
   return textoCifrado;
 }
 
-console.log(cifrar('z', 'te2112#@!#@amo'));
+console.log(cifrar('c', 'Batatinha quando Nasce EspAlha a RAma pelo Chão'));
 
 /**
  * @param {string} chave 
@@ -41,22 +47,30 @@ console.log(cifrar('z', 'te2112#@!#@amo'));
  */
 function decifrar(chave, textoCifrado) {
   let textoDecifrado = '';
+  let codigoA = 0;
+  let codigoZ = 0;
 
   for (let letra of textoCifrado) {
-    if (!letra.trim()) {
+    if (!ALFABETO_MIN.includes(letra.toLowerCase())) {
       textoDecifrado += letra;
       continue;
     }
 
-    let codigo = letra.charCodeAt(0) - alfabeto.indexOf(chave);
-    codigo = codigo < CODIGO_A ? (CODIGO_Z + 1) - (CODIGO_A % codigo) : codigo;
-   
+    if (ALFABETO_MIN.includes(letra))
+      [codigoA, codigoZ] = [CODIGO_A_MIN, CODIGO_Z_MIN];
+
+    if (ALFABETO_MAI.includes(letra))
+      [codigoA, codigoZ] = [CODIGO_A_MAI, CODIGO_Z_MAI];
+
+    const codigoDeslocado = letra.charCodeAt(0) - ALFABETO_MIN.indexOf(chave.toLowerCase());
+    const codigo = codigoDeslocado < codigoA ? (codigoZ + 1) - (codigoA % codigoDeslocado) : codigoDeslocado;
+
     const letraModificada = String.fromCharCode(codigo);
-   
+
     textoDecifrado += letraModificada;
   }
 
   return textoDecifrado;
 }
 
-console.log(decifrar('z', 'sd zln'));
+console.log(decifrar('c', 'Dcvcvkpjc swcpfq Pcueg GurCnjc c TCoc rgnq Ejãq'));
