@@ -22,7 +22,7 @@ wsServer.on("connection", (connection, request) => {
     
     connections[uuid] = connection;
     
-    console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`)
+    console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`);
 
     connection.on("message", (message) => {
         console.log(`Usuário: ${username} enviou ${message.toString()}`);
