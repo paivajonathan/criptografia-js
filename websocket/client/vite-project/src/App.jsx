@@ -25,13 +25,18 @@ function App() {
       const data = JSON.parse(e.data);
       const { username, message, event } = data;
 
-      if (event === "close") {
-        alert(`User ${username} has logged off`);
-        setMessages([]);
-        return;
+      let newMessage = {};
+
+      switch (event) {
+        case "connection":
+          newMessage = { author: "", text: `${username} entrou no chat.` };
+          break;
+        case "close":
+          newMessage = { author: "", text: `${username} saiu do chat.` };
+        default:
+          newMessage = { author: username, text: message };
       }
-      
-      const newMessage = { author: username, text: message };
+
       setMessages(prevMessages => [newMessage, ...prevMessages]);
     };
 
