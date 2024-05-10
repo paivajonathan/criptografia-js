@@ -31,7 +31,8 @@ wsServer.on("connection", (connection, request) => {
 
         Object.keys(connections).forEach((id) => {
             const connection = connections[id];
-            connection.send(`${username}: ${message.toString()}`);
+            const data = JSON.stringify({username, message: message.toString(), event: "message"});
+            connection.send(data);
         });
     });
     
@@ -40,7 +41,8 @@ wsServer.on("connection", (connection, request) => {
 
         Object.keys(connections).forEach((id) => {
             const connection = connections[id];
-            connection.send(`Log off: ${username}`);
+            const data = JSON.stringify({username, message: "", event: "close"});
+            connection.send(data);
         });
 
         delete connections[uuid];

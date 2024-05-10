@@ -1,3 +1,4 @@
+import style from "./App.module.css";
 import { useState, useEffect, useRef } from "react";
 
 function App() {
@@ -18,14 +19,17 @@ function App() {
       console.log("Conexão estabelecida");
     };
 
-    ws.onmessage = (event) => {
-      const [author, data] = event.data.split(": ");
-      if (author.toLowerCase() === "log off") {
-        alert(`User ${data} has logged off`);
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      const { username, message, event } = data;
+
+      if (event === "close") {
+        alert(`User ${username} has logged off`);
         setMessages([]);
         return;
       }
-      const newMessage = { author, data };
+      
+      const newMessage = { author: username, text: message };
       setMessages(prevMessages => [newMessage, ...prevMessages]);
     };
 
@@ -36,12 +40,13 @@ function App() {
 
   return (
     <>
-      <h1>Testando</h1>
+      <h1>Cryptowhats</h1>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
           value={text}
           onChange={(event) => setText(event.target.value)}
+          placeholder="Digite uma mensagem"
         />
         <input type="submit" value="Enviar" />
       </form>
@@ -49,7 +54,7 @@ function App() {
         <h1>Messages:</h1>
         <ul>
           {messages.map((message, index) => (
-            <li key={index}>{`${message.author}: ${message.data}`}</li>
+            <li key={index}>{`${message.author}: ${message.text}`}</li>
           ))}
         </ul>
       </div>
