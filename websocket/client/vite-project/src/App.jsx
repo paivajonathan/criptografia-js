@@ -1,6 +1,8 @@
 import style from "./App.module.css";
 import { useState, useEffect, useRef } from "react";
 
+const ADDRESS = "ws://192.168.11.111:8000";
+
 function App() {
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -13,7 +15,7 @@ function App() {
   }
 
   useEffect(() => {
-    const ws = new WebSocket("ws://127.0.0.1:8000");
+    const ws = new WebSocket(ADDRESS);
 
     ws.onopen = () => {
       console.log("Conexão estabelecida");
