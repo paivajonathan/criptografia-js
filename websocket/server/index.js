@@ -12,11 +12,16 @@ const port = 8000;
 
 const MAX_CONNECTIONS = 2;
 const connections = {};
+const messages = [];
+
+function sendToOne(connection, message) {
+    connection.send(JSON.stringify({ username: "server", message, event: "oldMessages" }));
+}
 
 function sendToAll(connections, username, message, event) {
     Object.keys(connections).forEach((id) => {
         const connection = connections[id];
-        const data = JSON.stringify({username, message, event});
+        const data = JSON.stringify({ username, message, event });
         connection.send(data);
     });
 }
@@ -31,13 +36,16 @@ wsServer.on("connection", (connection, request) => {
     const uuid = uuidv4();
     
     connections[uuid] = connection;
-    
+
     console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`);
+    sendToOne(connection, messages);
+    console.log(messages);
     sendToAll(connections, username, "", "connection");
 
     connection.on("message", (message) => {
         console.log(`${username} enviou ${message.toString()}`);
         sendToAll(connections, username, message.toString(), "message");
+        messages.push({ username, message: message.toString() });
     });
     
     connection.on("close", (code, reason) => {

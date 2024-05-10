@@ -28,6 +28,9 @@ function App() {
       let newMessage = {};
 
       switch (event) {
+        case "oldMessages":
+          console.log(message);
+          break;
         case "connection":
           newMessage = { author: "", text: `${username} entrou no chat.` };
           break;
