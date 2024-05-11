@@ -1,7 +1,7 @@
 import style from "./App.module.css";
 import { useState, useEffect, useRef } from "react";
 
-const ADDRESS = "ws://192.168.11.111:8000";
+const ADDRESS = "ws://localhost:8000";
 
 function App() {
   const [text, setText] = useState("");
@@ -28,9 +28,6 @@ function App() {
       let newMessage = {};
 
       switch (event) {
-        case "oldMessages":
-          console.log(message);
-          break;
         case "connection":
           newMessage = { author: "", text: `${username} entrou no chat.` };
           break;
