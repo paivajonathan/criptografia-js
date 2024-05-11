@@ -5,8 +5,19 @@ const ADDRESS = "ws://localhost:8000";
 
 function App() {
   const [text, setText] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [data, setData] = useState([]);
   const socket = useRef(null);
+
+  function checkEvent(username, message, event) {
+    switch (event) {
+      case "connection":
+        return { author: "", text: `${username} entrou no servidor.`};
+      case "close":
+        return { author: "", text: `${username} saiu do servidor.` };
+      default:
+        return { author: username, text: `: ${message}` };
+    }
+  }
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -16,6 +27,7 @@ function App() {
 
   useEffect(() => {
     const ws = new WebSocket(ADDRESS);
+    console.log("Use effect executado");
 
     ws.onopen = () => {
       console.log("Conexão estabelecida");
@@ -25,19 +37,16 @@ function App() {
       const data = JSON.parse(e.data);
       const { username, message, event } = data;
 
-      let newMessage = {};
-
-      switch (event) {
-        case "connection":
-          newMessage = { author: "", text: `${username} entrou no chat.` };
-          break;
-        case "close":
-          newMessage = { author: "", text: `${username} saiu do chat.` };
-        default:
-          newMessage = { author: username, text: message };
+      if (message instanceof Array) {
+        message.forEach(({ username, message, event }) => {
+          const newData = checkEvent(username, message, event);
+          setData(prevData => [newData, ...prevData]);
+        });
+        return;
       }
 
-      setMessages(prevMessages => [newMessage, ...prevMessages]);
+      const newData = checkEvent(username, message, event);
+      setData(prevData => [newData, ...prevData]);
     };
 
     socket.current = ws;
@@ -60,8 +69,10 @@ function App() {
       <div>
         <h1>Messages:</h1>
         <ul>
-          {messages.map((message, index) => (
-            <li key={index}>{`${message.author}: ${message.text}`}</li>
+          {data.map((data, index) => (
+            <li key={index}>
+              {`${data.author ?? ""}${data.text}`}
+            </li>
           ))}
         </ul>
       </div>
