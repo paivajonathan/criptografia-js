@@ -26,7 +26,9 @@ function App() {
   }
 
   useEffect(() => {
-    const ws = new WebSocket(ADDRESS);
+    const params = new URLSearchParams(document.location.search);
+    const username = params.get("username") ?? "";
+    const ws = new WebSocket(`${ADDRESS}${ username ? "?username=" + username : username }`);
     console.log("Use effect executado");
 
     ws.onopen = () => {
