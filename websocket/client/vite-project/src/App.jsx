@@ -20,7 +20,7 @@ function App() {
       case "close":
         return { author: "", text: `${username} saiu do servidor.` };
       default:
-        return { author: username, text: `: ${message}` };
+        return { author: `${username}: `, text: message };
     }
   }
 
@@ -72,12 +72,13 @@ function App() {
 
   return (
     <main className={styles.main}>
-      <h1>Cryptowhats</h1>
+      <h1 className={styles.title}>Cryptowhats</h1>
 
       <div className={styles.messages}>
         {data.map((data, index) => (
           <div className={styles.message} key={index}>
-            {`${data.author ?? ""}${data.text}`}
+            <strong>{data.author ?? ""}</strong>
+            {data.author ? <span>{data.text}</span> : <em>{data.text}</em>}
           </div>
         ))}
         <div ref={messagesEndRef} />
