@@ -58,14 +58,26 @@
 .messageBox {
   width: 95%;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
-  gap: 3rem;
   border-radius: 1rem;
   overflow: hidden;
   padding: 0 0.25rem;
   background-color: white;
+}
+
+.buttonArea {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  padding: 0 .5rem;
+}
+
+.messageBox img {
+  width: 25px;
+  cursor: pointer;
 }
 
 .textInput {
@@ -93,6 +105,6 @@
   cursor: pointer;
 }
 
-.textButton img {
-  width: 25px;
+.imageUpload > input {
+  display: none;
 }

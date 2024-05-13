@@ -1,6 +1,7 @@
 import styles from "./App.module.css";
 import { useState, useEffect, useRef } from "react";
 import SendLogo from "./assets/send.svg";
+import ClipLogo from "./assets/clip.svg";
 import useAutosizeTextArea from "./useAutosizeTextArea";
 
 const ADDRESS = "ws://localhost:8000";
@@ -94,9 +95,17 @@ function App() {
           className={styles.textInput}
           ref={textAreaRef}
         ></textarea>
-        <button type="submit" className={styles.textButton}>
-          <img src={SendLogo} alt="Enviar" />
-        </button>
+        <div className={styles.buttonArea}>
+          <div className={styles.imageUpload}>
+            <label for="file-input">
+              <img src={ClipLogo} alt="Arquivo" />
+            </label>
+            <input id="file-input" type="file" />
+          </div>
+          <button type="submit" className={styles.textButton}>
+            <img src={SendLogo} alt="Enviar" />
+          </button>
+        </div>
       </form>
     </main>
   );
