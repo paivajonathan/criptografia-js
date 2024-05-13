@@ -1,13 +1,17 @@
 import styles from "./App.module.css";
 import { useState, useEffect, useRef } from "react";
+import SendLogo from "./assets/send.svg";
+import useAutosizeTextArea from "./useAutosizeTextArea";
 
 const ADDRESS = "ws://localhost:8000";
 
 function App() {
   const [text, setText] = useState("");
   const [data, setData] = useState([]);
-  const socket = useRef(null);
+  const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const textAreaRef = useRef(null);
+  useAutosizeTextArea(textAreaRef.current, text);
 
   function checkEvent(username, message, event) {
     switch (event) {
@@ -21,9 +25,12 @@ function App() {
   }
 
   function handleSubmit(event) {
+    if (!["keydown", "submit"].includes(event.type)) return;
+    if (event.type === "keydown" && event.keyCode !== 13) return;
+
     event.preventDefault();
     setText("");
-    socket.current.send(text);
+    socketRef.current.send(text);
   }
 
   useEffect(() => {
@@ -54,7 +61,7 @@ function App() {
       setData((prevData) => [...prevData, newData]);
     };
 
-    socket.current = ws;
+    socketRef.current = ws;
 
     return () => ws.close();
   }, []);
@@ -66,25 +73,29 @@ function App() {
   return (
     <main className={styles.main}>
       <h1>Cryptowhats</h1>
+
       <div className={styles.messages}>
-        <ul>
-          {data.map((data, index) => (
-            <li key={index}>{`${data.author ?? ""}${data.text}`}</li>
-          ))}
-        </ul>
+        {data.map((data, index) => (
+          <div className={styles.message} key={index}>
+            {`${data.author ?? ""}${data.text}`}
+          </div>
+        ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className={styles.messageBox}>
-          <input
-            type="text"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            placeholder="Digite uma mensagem"
-          />
-          <input type="submit" value="Enviar" />
-        </div>
+      <form onSubmit={handleSubmit} className={styles.messageBox}>
+        <textarea
+          rows={1}
+          placeholder="Digite a sua mensagem"
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          onKeyDown={handleSubmit}
+          className={styles.textInput}
+          ref={textAreaRef}
+        ></textarea>
+        <button type="submit" className={styles.textButton}>
+          <img src={SendLogo} alt="Enviar" />
+        </button>
       </form>
     </main>
   );

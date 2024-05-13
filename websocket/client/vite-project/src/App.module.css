@@ -1,3 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+* {
+  margin: none;
+  padding: none;
+  box-sizing: border-box;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+}
+
 .main {
   display: flex;
   justify-content: center;
@@ -8,12 +17,48 @@
 }
 
 .messages {
-  overflow: scroll;
+  overflow-y: scroll;
   height: 500px;
   width: 100%;
 }
 
 .messageBox {
+  width: 95%;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 3rem;
+  border: 1px solid black;
+  border-radius: 1rem;
+  overflow: hidden;
+  padding: 0 .25rem;
+}
+
+.textInput {
+  width: 100%;
+  padding: 10px 10px;
+  border: none;
+  font-size: 20px;
+  resize: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.textInput:focus {
+  outline: none;
+}
+
+.textButton {
+  padding: .25rem;
+  background: none;
+  border: none;
+}
+
+.textButton:hover {
+  cursor: pointer;
+}
+
+.textButton img {
+  width: 25px;
 }

@@ -50,7 +50,7 @@ wsServer.on("connection", (connection, request) => {
         sendToAll(connections, username, message.toString(), "message");        
     });
     
-    connection.on("close", (code, reason) => {
+    connection.on("close", () => {
         console.log(`Usuário ${username} se deslogou.`);
         sendToAll(connections, username, "", "close");
         delete connections[uuid];
