@@ -4,14 +4,16 @@ import SendLogo from "./assets/send.svg";
 import ClipLogo from "./assets/clip.svg";
 import useAutosizeTextArea from "./useAutosizeTextArea";
 
-const ADDRESS = "ws://localhost:8000";
+const ADDRESS = "ws://192.168.10.237:8000";
 
 function App() {
   const [text, setText] = useState("");
   const [data, setData] = useState([]);
+  
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const textAreaRef = useRef(null);
+  
   useAutosizeTextArea(textAreaRef.current, text);
 
   function checkEvent(username, message, event) {
@@ -37,11 +39,7 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(document.location.search);
     const username = params.get("username") ?? "";
-    const ws = new WebSocket(
-      `${ADDRESS}${username ? "?username=" + username : username}`
-    );
-    console.log("Use effect executado");
-
+    const ws = new WebSocket(`${ADDRESS}?username=${username}`);
     ws.onopen = () => {
       console.log("Conexão estabelecida");
     };
@@ -95,13 +93,8 @@ function App() {
           className={styles.textInput}
           ref={textAreaRef}
         ></textarea>
+
         <div className={styles.buttonArea}>
-          <div className={styles.imageUpload}>
-            <label htmlFor="file-input">
-              <img src={ClipLogo} alt="Arquivo" />
-            </label>
-            <input id="file-input" type="file" />
-          </div>
           <button type="submit" className={styles.textButton}>
             <img src={SendLogo} alt="Enviar" />
           </button>
