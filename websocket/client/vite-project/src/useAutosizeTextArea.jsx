@@ -9,11 +9,9 @@ export default function useAutosizeTextArea(current, value) {
 
   useEffect(() => {
     if (!current) return;
-    
-    const height = firstUpdateRef.current ? current.scrollHeight + 2 : current.scrollHeight;
-    
-    current.style.height = "0px";
-    current.style.height = `${height}px`;
+        
+    current.style.height = "auto";
+    current.style.height = `${firstUpdateRef.current ? current.scrollHeight + 2 : current.scrollHeight}px`;
     
     firstUpdateRef.current = false;
   }, [current, value])

@@ -97,7 +97,7 @@ function App() {
         ></textarea>
         <div className={styles.buttonArea}>
           <div className={styles.imageUpload}>
-            <label for="file-input">
+            <label htmlFor="file-input">
               <img src={ClipLogo} alt="Arquivo" />
             </label>
             <input id="file-input" type="file" />
