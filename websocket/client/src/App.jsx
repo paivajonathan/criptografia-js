@@ -4,7 +4,7 @@ import SendLogo from "./assets/send.svg";
 import ClipLogo from "./assets/clip.svg";
 import useAutosizeTextArea from "./useAutosizeTextArea";
 
-const ADDRESS = "ws://192.168.10.237:8000";
+const ADDRESS = "ws://localhost:8000";
 
 function App() {
   const [text, setText] = useState("");
