@@ -24,23 +24,48 @@ function getRandomBetween(min, max) {
 
 /**
  *
+ * @param {number} maxValue
+ */
+function sieve(maxValue) {
+  /**
+   * @type {boolean[]}
+   */
+  const values = new Array(maxValue + 1).fill(true);
+
+  /**
+   * @type {number[]}
+   */
+  const primes = [];
+
+  for (let i = 0; i < 2; i++)
+    values[i] = false;
+
+  for (let i = 2; i < values.length; i++) {
+    if (!i) continue;
+    for (let j = i + i; j < values.length; j += i)
+      values[j] = false;
+  }
+
+  for (const position in values)
+    values[position] && primes.push(+position);
+
+  return primes;
+}
+
+/**
  * @returns array of primal numbers
  */
 function generatePrimalPair() {
-  let primal1,
-    primal2 = 0;
+  let prime1 = 0, prime2 = 0;
 
-  while (true) {
-    primal1 = getRandomBetween(10, 100);
-    if (primal1 % 6 === 5 && isPrimal(primal1)) break;
+  const primes = sieve(10000);
+
+  while ((prime1 === prime2) || (prime1 % 6 !== 5) || (prime2 % 6 !== 5)) {
+    prime1 = primes[Math.floor(Math.random() * primes.length)];
+    prime2 = primes[Math.floor(Math.random() * primes.length)];
   }
 
-  while (true) {
-    primal2 = getRandomBetween(10, 100);
-    if (primal2 % 6 === 5 && isPrimal(primal2) && primal2 !== primal1) break;
-  }
-
-  return [primal1, primal2];
+  return [prime1, prime2];
 }
 
 /**
@@ -110,19 +135,19 @@ function decrypt(encryptedText, privateKey1, privateKey2) {
     console.log("Private keys must both be primal numbers!");
     return;
   }
-
+  
   const publicKey = privateKey1 * privateKey2;
   const totientFunction = (privateKey1 - 1) * (privateKey2 - 1);
   const decryptingKey = getInverse(3, totientFunction);
-
+  
   if (decryptingKey === -1) {
     console.log("The keys are not valid!");
     return;
   }
-
+  
   const encryptedBlocks = encryptedText.split(" ").map(Number);
   const chars = [];
-
+  
   for (const encryptedBlock of encryptedBlocks) {
     const block = parseInt(BigInt(BigInt(encryptedBlock) ** BigInt(decryptingKey)) % BigInt(publicKey));
     const charCode = block === 99 ? block - 67 : block + 55;
@@ -134,5 +159,5 @@ function decrypt(encryptedText, privateKey1, privateKey2) {
   return text;
 }
 
-const { encryptedText, privateKey1, privateKey2 } = encrypt("Testando");
+const { encryptedText, privateKey1, privateKey2 } = encrypt("A baTata esPalhA a RAma pelo CHao");
 console.log(decrypt(encryptedText, privateKey1, privateKey2));
