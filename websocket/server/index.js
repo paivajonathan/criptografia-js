@@ -14,11 +14,9 @@ const MAX_CONNECTIONS = 2;
 const connections = {};
 const oldData = [];
 
-function sendOldData(connection) {
-    connection.send(JSON.stringify(oldData));
-}
-
 function sendToAll(connections, username, message, event) {
+    console.log(`${username} - ${message} - ${event}`);
+    
     const data = { username, message, event };
 
     Object.keys(connections).forEach((id) => {
@@ -31,29 +29,27 @@ function sendToAll(connections, username, message, event) {
 
 wsServer.on("connection", (connection, request) => {
     if (Object.keys(connections).length >= MAX_CONNECTIONS) {
-        connection.close();
+        connection.close(1000, "Foi excedido o limite de conexões!");
         return;
     }
 
     const username = url.parse(request.url, true).query.username || faker.person.fullName();
-    const uuid = uuidv4();
-    
-    connections[uuid] = connection;
 
-    console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`);
+    if (Object.keys(connections).includes(username)) {
+        connection.close(1000, "Usuário já existe!");
+        return;
+    }
     
-    sendOldData(connection);
+    connections[username] = connection;
+    
+    connection.send(JSON.stringify(oldData));
     sendToAll(connections, username, "", "connection");
 
-    connection.on("message", (message) => {
-        console.log(`${username} enviou ${message.toString()}`);
-        
+    connection.on("message", (message) => {        
         sendToAll(connections, username, message.toString(), "message");        
     });
     
-    connection.on("close", () => {
-        console.log(`Usuário ${username} se deslogou.`);
-        
+    connection.on("close", () => {        
         sendToAll(connections, username, "", "close");
         delete connections[uuid];
     });

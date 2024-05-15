@@ -2,7 +2,7 @@ import styles from "./Chat.module.css";
 import { useState, useEffect, useRef } from "react";
 import SendLogo from "../../assets/send.svg";
 import useAutosizeTextArea from "../../hooks/useAutosizeTextArea";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const ADDRESS = "ws://localhost:8000";
 
@@ -32,6 +32,7 @@ export default function Chat() {
   const textAreaRef = useRef(null);
 
   const { username } = useParams();
+  const navigate = useNavigate();
 
   useAutosizeTextArea(textAreaRef.current, text);
 
@@ -64,6 +65,11 @@ export default function Chat() {
         setData((prevData) => [...prevData, newData]);
       });
     };
+
+    ws.onclose = (e) => {
+      alert(e.reason);
+      navigate("/");
+    }
 
     socketRef.current = ws;
 
