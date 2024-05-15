@@ -58,7 +58,7 @@ function sieve(maxValue) {
 function generatePrimalPair() {
   let prime1 = 0, prime2 = 0;
 
-  const primes = sieve(10000);
+  const primes = sieve(100);
 
   while ((prime1 === prime2) || (prime1 % 6 !== 5) || (prime2 % 6 !== 5)) {
     prime1 = primes[Math.floor(Math.random() * primes.length)];

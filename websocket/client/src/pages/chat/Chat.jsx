@@ -19,7 +19,7 @@ function checkEvent(username, message, event) {
     case "close":
       return { author: "", text: `${username} saiu do servidor.` };
     default:
-      return { author: `${username}: `, text: message };
+      return { author: username, text: message };
   }
 }
 
@@ -39,12 +39,12 @@ export default function Chat() {
   /**
    * @param {Event} event 
    */
-  function handleSubmit(event) {    
+  function handleSubmit(event) {
     if (!["keydown", "submit"].includes(event.type)) return;
     if (event.type === "keydown" && event.keyCode !== 13) return;
-    
+
     event.preventDefault();
-    
+
     if (!text) {
       alert("Digite uma mensagem válida!");
       return;
@@ -94,9 +94,20 @@ export default function Chat() {
 
       <div className={styles.messages}>
         {data.map((data, index) => (
-          <div className={styles.message} key={index}>
-            <strong>{data.author ?? ""}</strong>
-            {data.author ? <span>{data.text}</span> : <em>{data.text}</em>}
+          <div
+            className={styles.message}
+            style={
+              {
+                alignSelf: data.author === username ? "flex-end" : "flex-start",
+                backgroundColor: data.author === username ? "#dcf8c6" : "#f4f4f4",
+                borderBottomRightRadius: data.author === username ? "0" : "10px",
+                borderBottomLeftRadius: data.author === username ? "10px" : "0",
+              }
+            }
+            key={index}
+          >
+            <div className={styles.messageTitle}>{data.author}</div>
+            <div className={styles.messageInfo} style={{ fontStyle: !data.author && "italic" }}>{data.text}</div>
           </div>
         ))}
         <div ref={messagesEndRef} />

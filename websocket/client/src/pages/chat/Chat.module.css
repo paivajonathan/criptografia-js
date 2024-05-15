@@ -30,7 +30,7 @@
   margin: 0 3rem;
   border: none;
   border-radius: .25rem;
-  align-items: flex-start;
+  /* align-items: flex-start; */
 }
 
 .messages::-webkit-scrollbar {
@@ -55,6 +55,19 @@
   padding: 1rem;
   border: none;
   border-radius: .5rem;
+  gap: .25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.messageTitle {
+  font-weight: bold;
+}
+
+.messageInfo {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
 }
 
 .messageBox {
