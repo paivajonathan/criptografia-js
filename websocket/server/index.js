@@ -51,7 +51,7 @@ wsServer.on("connection", (connection, request) => {
     
     connection.on("close", () => {        
         sendToAll(connections, username, "", "close");
-        delete connections[uuid];
+        delete connections[username];
     });
 });
 

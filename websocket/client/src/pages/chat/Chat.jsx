@@ -67,7 +67,7 @@ export default function Chat() {
     };
 
     ws.onclose = (e) => {
-      alert(e.reason);
+      alert(e.reason || "Ocorreu um erro inesperado.");
       navigate("/");
     }
 
