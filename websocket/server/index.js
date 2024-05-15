@@ -2,9 +2,6 @@ const http = require("http");
 const { WebSocketServer } = require("ws");
 
 const url = require("url");
-const uuidv4 = require("uuid").v4;
-
-const { faker } = require('@faker-js/faker');
 
 const server = http.createServer();
 const wsServer = new WebSocketServer({ server });
@@ -33,7 +30,7 @@ wsServer.on("connection", (connection, request) => {
         return;
     }
 
-    const username = url.parse(request.url, true).query.username || faker.person.fullName();
+    const username = url.parse(request.url, true).query.username;
 
     if (Object.keys(connections).includes(username)) {
         connection.close(1000, "Usuário já existe!");
