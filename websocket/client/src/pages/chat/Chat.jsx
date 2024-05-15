@@ -67,8 +67,6 @@ export default function Chat() {
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
 
-      console.log(data);
-
       data.forEach(({ username, message, event }) => {
         const newData = checkEvent(username, message, event);
         setData((prevData) => [...prevData, newData]);
@@ -76,11 +74,8 @@ export default function Chat() {
     };
 
     ws.onclose = (e) => {
-      if (!e.wasClean)
-        alert("Ocorreu um erro inesperado.");
-      else if (e.reason)
-        alert(e.reason);
-      
+      e.reason && alert(e.reason);
+
       navigate("/");
     }
 

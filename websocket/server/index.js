@@ -14,8 +14,11 @@ const connections = {};
 
 async function sendOldData(connection) {
     const oldData = await prisma.data.findMany({
-        orderBy: { id: "asc" }
+        orderBy: {
+            id: "asc",
+        }
     });
+    
     connection.send(JSON.stringify(oldData));
 }
 
@@ -41,7 +44,7 @@ wsServer.on("connection", async (connection, request) => {
     const username = url.parse(request.url, true).query.username;
 
     if (Object.keys(connections).includes(username)) {
-        connection.close(1000, "Usuário já existe!");
+        connection.close(1000, "Usuário já está logado!");
         return;
     }
     
@@ -50,11 +53,11 @@ wsServer.on("connection", async (connection, request) => {
     await sendOldData(connection);
     await sendToAll(connections, username, "", "connection");
 
-    connection.on("message", (message) => {        
+    connection.on("message", (message) => {
         sendToAll(connections, username, message.toString(), "message");        
     });
     
-    connection.on("close", () => {        
+    connection.on("close", () => { 
         sendToAll(connections, username, "", "close");
         delete connections[username];
     });
