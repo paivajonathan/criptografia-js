@@ -54,6 +54,13 @@ export default function Chat() {
     socketRef.current.send(text);
   }
 
+  function handleExit() {
+    if (confirm("Deseja sair do chat?")) {
+      alert("Obrigado por usar!");
+      navigate("/");
+    }
+  }
+
   useEffect(function createWebSocketConnection() {
     const ws = new WebSocket(`${ADDRESS}?username=${username}`);
 
@@ -67,7 +74,11 @@ export default function Chat() {
     };
 
     ws.onclose = (e) => {
-      alert(e.reason || "Ocorreu um erro inesperado.");
+      if (!e.wasClean)
+        alert("Ocorreu um erro inesperado.");
+      else if (e.reason)
+        alert(e.reason);
+      
       navigate("/");
     }
 
@@ -82,7 +93,7 @@ export default function Chat() {
 
   return (
     <div className={styles.main}>
-      <h1 className={styles.title}>Cryptowhats</h1>
+      <h1 className={styles.title} onClick={handleExit}>Cryptowhats</h1>
 
       <div className={styles.messages}>
         {data.map((data, index) => (

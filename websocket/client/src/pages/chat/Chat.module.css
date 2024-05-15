@@ -14,6 +14,10 @@
   font-size: var(--title-size);
 }
 
+.title:hover {
+  cursor: pointer;
+}
+
 .messages {
   overflow-y: scroll;
   height: 500px;
