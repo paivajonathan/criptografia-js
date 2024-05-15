@@ -35,11 +35,20 @@ export default function Chat() {
 
   useAutosizeTextArea(textAreaRef.current, text);
 
-  function handleSubmit(event) {
+  /**
+   * @param {Event} event 
+   */
+  function handleSubmit(event) {    
     if (!["keydown", "submit"].includes(event.type)) return;
     if (event.type === "keydown" && event.keyCode !== 13) return;
-
+    
     event.preventDefault();
+    
+    if (!text) {
+      alert("Digite uma mensagem válida!");
+      return;
+    }
+
     setText("");
     socketRef.current.send(text);
   }

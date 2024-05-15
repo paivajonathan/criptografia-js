@@ -5,23 +5,27 @@
   min-height: 100vh;
   flex-direction: column;
   background-color: var(--primary-color);
-  padding: 3rem 0;
+  padding: 3rem 2rem;
+  gap: 3rem;
 }
 
 .title {
   color: white;
-  font-size: 50px;
+  font-size: var(--title-size);
 }
 
 .messages {
   overflow-y: scroll;
   height: 500px;
   width: 100%;
-  background-color: gray;
+  background-color: rgb(122, 121, 121);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 0 1rem;
+  margin: 0 3rem;
+  border: none;
+  border-radius: .25rem;
   align-items: flex-start;
 }
 
@@ -30,7 +34,11 @@
 }
 
 .messages::-webkit-scrollbar-track {
+  border: none;
+  border-top-right-radius: .25rem;
+  border-bottom-right-radius: .25rem;
   background: #555;
+  overflow: hidden;
 }
 
 .messages::-webkit-scrollbar-thumb {
@@ -47,7 +55,7 @@
 }
 
 .messageBox {
-  width: 95%;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

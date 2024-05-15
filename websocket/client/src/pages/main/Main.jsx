@@ -11,6 +11,12 @@ export default function Main() {
    */
   function handleSubmit(event) {
     event.preventDefault();
+    
+    if (!username) {
+      alert("Você precisa digitar um nome válido!");
+      return;
+    }
+    
     navigate(`/chat/${username}`);
   }
 

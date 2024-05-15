@@ -4,13 +4,16 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  gap: 1rem;
+  align-items: stretch;
+  gap: 3rem;
+  border: 5px solid #000;
+  padding: 1rem;
 }
 
 .title {
   font-size: var(--title-size);
   color: var(--title-color);
+  text-align: center;
 }
 
 .form {
@@ -18,15 +21,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .usernameInput {
-  min-width: 500px;
+  width: 75%;
   font-size: 1.5em;
   border: none;
   border-radius: .25rem;
-  padding: .5rem;
+  padding: 1rem;
 }
 
 .usernameInput:focus {
@@ -39,8 +42,11 @@
   border: none;
   border-radius: .25rem;
   font-size: 1rem;
+  transition: transform ease-in-out 100ms, background-color ease-in-out 100ms;
 }
 
 .submitButton:hover {
   cursor: pointer;
+  background-color: var(--secondary-color);
+  transform: scale(1.05);
 }

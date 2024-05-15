@@ -2,7 +2,8 @@
 
 :root {
   --primary-color: gray;
-  --title-size: 50px;
+  --secondary-color: lightgray;
+  --title-size: 75px;
   --title-color: white;
 }
 
