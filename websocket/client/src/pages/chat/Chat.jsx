@@ -67,6 +67,8 @@ export default function Chat() {
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
 
+      console.log(data);
+
       data.forEach(({ username, message, event }) => {
         const newData = checkEvent(username, message, event);
         setData((prevData) => [...prevData, newData]);

@@ -2,16 +2,24 @@ const http = require("http");
 const { WebSocketServer } = require("ws");
 
 const url = require("url");
+const { PrismaClient } = require("@prisma/client");
 
+const prisma = new PrismaClient();
 const server = http.createServer();
 const wsServer = new WebSocketServer({ server });
 const port = 8000;
 
 const MAX_CONNECTIONS = 2;
 const connections = {};
-const oldData = [];
 
-function sendToAll(connections, username, message, event) {
+async function sendOldData(connection) {
+    const oldData = await prisma.data.findMany({
+        orderBy: { id: "asc" }
+    });
+    connection.send(JSON.stringify(oldData));
+}
+
+async function sendToAll(connections, username, message, event) {
     console.log(`${username} - ${message} - ${event}`);
     
     const data = { username, message, event };
@@ -21,10 +29,10 @@ function sendToAll(connections, username, message, event) {
         connection.send(JSON.stringify([data]));
     });
 
-    oldData.push(data);
+    await prisma.data.create({data: data});
 }
 
-wsServer.on("connection", (connection, request) => {
+wsServer.on("connection", async (connection, request) => {
     if (Object.keys(connections).length >= MAX_CONNECTIONS) {
         connection.close(1000, "Foi excedido o limite de conexões!");
         return;
@@ -39,8 +47,8 @@ wsServer.on("connection", (connection, request) => {
     
     connections[username] = connection;
     
-    connection.send(JSON.stringify(oldData));
-    sendToAll(connections, username, "", "connection");
+    await sendOldData(connection);
+    await sendToAll(connections, username, "", "connection");
 
     connection.on("message", (message) => {        
         sendToAll(connections, username, message.toString(), "message");        
