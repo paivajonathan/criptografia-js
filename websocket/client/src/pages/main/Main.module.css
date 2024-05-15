@@ -1,0 +1,46 @@
+.main {
+  min-height: 100vh;
+  background-color: var(--primary-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title {
+  font-size: var(--title-size);
+  color: var(--title-color);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.usernameInput {
+  min-width: 500px;
+  font-size: 1.5em;
+  border: none;
+  border-radius: .25rem;
+  padding: .5rem;
+}
+
+.usernameInput:focus {
+  outline: none;
+}
+
+.submitButton {
+  width: 150px;
+  height: 50px;
+  border: none;
+  border-radius: .25rem;
+  font-size: 1rem;
+}
+
+.submitButton:hover {
+  cursor: pointer;
+}

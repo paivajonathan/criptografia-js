@@ -1,31 +1,39 @@
-import styles from "./App.module.css";
+import styles from "./Chat.module.css";
 import { useState, useEffect, useRef } from "react";
-import SendLogo from "./assets/send.svg";
-import ClipLogo from "./assets/clip.svg";
-import useAutosizeTextArea from "./useAutosizeTextArea";
+import SendLogo from "../../assets/send.svg";
+import useAutosizeTextArea from "../../hooks/useAutosizeTextArea";
+import { useParams } from "react-router-dom";
 
 const ADDRESS = "ws://localhost:8000";
 
-function App() {
+/**
+ * @param {string} username 
+ * @param {string} message 
+ * @param {string} event 
+ * @returns 
+ */
+function checkEvent(username, message, event) {
+  switch (event) {
+    case "connection":
+      return { author: "", text: `${username} entrou no servidor.` };
+    case "close":
+      return { author: "", text: `${username} saiu do servidor.` };
+    default:
+      return { author: `${username}: `, text: message };
+  }
+}
+
+export default function Chat() {
   const [text, setText] = useState("");
   const [data, setData] = useState([]);
-  
+
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const textAreaRef = useRef(null);
-  
-  useAutosizeTextArea(textAreaRef.current, text);
 
-  function checkEvent(username, message, event) {
-    switch (event) {
-      case "connection":
-        return { author: "", text: `${username} entrou no servidor.` };
-      case "close":
-        return { author: "", text: `${username} saiu do servidor.` };
-      default:
-        return { author: `${username}: `, text: message };
-    }
-  }
+  const { username } = useParams();
+
+  useAutosizeTextArea(textAreaRef.current, text);
 
   function handleSubmit(event) {
     if (!["keydown", "submit"].includes(event.type)) return;
@@ -36,10 +44,9 @@ function App() {
     socketRef.current.send(text);
   }
 
-  useEffect(() => {
-    const params = new URLSearchParams(document.location.search);
-    const username = params.get("username") ?? "";
+  useEffect(function createWebSocketConnection() {
     const ws = new WebSocket(`${ADDRESS}?username=${username}`);
+
     ws.onopen = () => {
       console.log("Conexão estabelecida");
     };
@@ -65,12 +72,12 @@ function App() {
     return () => ws.close();
   }, []);
 
-  useEffect(() => {
+  useEffect(function scrollMessages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [data]);
 
   return (
-    <main className={styles.main}>
+    <div className={styles.main}>
       <h1 className={styles.title}>Cryptowhats</h1>
 
       <div className={styles.messages}>
@@ -100,8 +107,6 @@ function App() {
           </button>
         </div>
       </form>
-    </main>
+    </div>
   );
 }
-
-export default App;
