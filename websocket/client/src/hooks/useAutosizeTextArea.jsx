@@ -11,8 +11,7 @@ export default function useAutosizeTextArea(current, value) {
     if (!current) return;
         
     current.style.height = "auto";
-    current.style.height = `${firstUpdateRef.current ? current.scrollHeight + 2 : current.scrollHeight}px`;
-    
+    current.style.height = `${firstUpdateRef.current ? "auto" : current.scrollHeight}px`;
     firstUpdateRef.current = false;
   }, [current, value])
 }
