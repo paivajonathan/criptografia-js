@@ -56,24 +56,13 @@ export default function Chat() {
   useEffect(function createWebSocketConnection() {
     const ws = new WebSocket(`${ADDRESS}?username=${username}`);
 
-    ws.onopen = () => {
-      console.log("Conexão estabelecida");
-    };
-
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
-      const { username, message, event } = data;
 
-      if (message instanceof Array) {
-        message.forEach(({ username, message, event }) => {
-          const newData = checkEvent(username, message, event);
-          setData((prevData) => [...prevData, newData]);
-        });
-        return;
-      }
-
-      const newData = checkEvent(username, message, event);
-      setData((prevData) => [...prevData, newData]);
+      data.forEach(({ username, message, event }) => {
+        const newData = checkEvent(username, message, event);
+        setData((prevData) => [...prevData, newData]);
+      });
     };
 
     socketRef.current = ws;
@@ -108,6 +97,7 @@ export default function Chat() {
           onKeyDown={handleSubmit}
           className={styles.textInput}
           ref={textAreaRef}
+          autoFocus
         ></textarea>
 
         <div className={styles.buttonArea}>

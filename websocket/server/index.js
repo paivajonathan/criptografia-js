@@ -12,22 +12,21 @@ const port = 8000;
 
 const MAX_CONNECTIONS = 2;
 const connections = {};
-const data = [];
+const oldData = [];
 
-function sendToOne(connection, username, message, event) {
-    connection.send(JSON.stringify({ username, message, event }));
+function sendOldData(connection) {
+    connection.send(JSON.stringify(oldData));
 }
 
 function sendToAll(connections, username, message, event) {
-    const dataToSend = { username, message, event };
+    const data = { username, message, event };
 
     Object.keys(connections).forEach((id) => {
         const connection = connections[id];
-        const data = JSON.stringify(dataToSend);
-        connection.send(data);
+        connection.send(JSON.stringify([data]));
     });
 
-    data.push(dataToSend);
+    oldData.push(data);
 }
 
 wsServer.on("connection", (connection, request) => {
@@ -42,16 +41,19 @@ wsServer.on("connection", (connection, request) => {
     connections[uuid] = connection;
 
     console.log(`O usuário ${username} (${uuid}) conectou-se no servidor.`);
-    sendToOne(connection, "server", data, "data");
+    
+    sendOldData(connection);
     sendToAll(connections, username, "", "connection");
 
     connection.on("message", (message) => {
         console.log(`${username} enviou ${message.toString()}`);
+        
         sendToAll(connections, username, message.toString(), "message");        
     });
     
     connection.on("close", () => {
         console.log(`Usuário ${username} se deslogou.`);
+        
         sendToAll(connections, username, "", "close");
         delete connections[uuid];
     });
