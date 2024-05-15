@@ -32,7 +32,7 @@ async function sendToAll(connections, username, message, event) {
         connection.send(JSON.stringify([data]));
     });
 
-    await prisma.data.create({data: data});
+    await prisma.data.create({ data: data });
 }
 
 wsServer.on("connection", async (connection, request) => {

@@ -106,7 +106,7 @@ export default function Chat() {
             }
             key={index}
           >
-            <div className={styles.messageTitle}>{data.author}</div>
+            <div className={styles.messageTitle}>{data.author !== username ? data.author : "Você"}</div>
             <div className={styles.messageInfo} style={{ fontStyle: !data.author && "italic" }}>{data.text}</div>
           </div>
         ))}

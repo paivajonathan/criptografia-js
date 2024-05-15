@@ -30,6 +30,7 @@ export default function Main() {
           value={username}
           placeholder="Digite o nome que você deseja ao entrar"
           className={styles.usernameInput}
+          autoFocus
         />
         <input type="submit" value="Enviar" className={styles.submitButton} />
       </form>
