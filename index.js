@@ -15,7 +15,8 @@ function sieve(maxValue) {
 
   const primes = [];
 
-  for (let i = 0; i < 2; i++) values[i] = false;
+  for (let i = 0; i < 2; i++)
+    values[i] = false;
 
   for (let i = 2; i < values.length; i++) {
     if (!i) continue;
@@ -66,7 +67,9 @@ function encrypt(text) {
   for (const char of text) {
     const charCode = char.charCodeAt(0);
     const block = char === " " ? charCode + 67 : charCode - 55;
+    
     const encryptedBlock = (block ** 3) % publicKey;
+    
     encryptedBlocks.push(encryptedBlock);
   }
 
@@ -124,6 +127,7 @@ function decrypt(encryptedText, prime1, prime2) {
   }
 
   const text = chars.join("");
+  
   return text;
 }
 
