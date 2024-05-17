@@ -86,6 +86,20 @@ function getInverse(number, mod) {
   return -1;
 }
 
+function powermod(base, exp, p) {
+  let result = 1n;
+  
+  while (exp !== 0n) {
+    if (exp % 2n === 1n)
+      result = result * base % p;
+    
+    base = base * base % p;
+    exp >>= 1n;
+  }
+  
+  return result;
+}
+
 function decrypt(encryptedText, prime1, prime2) {
   if (!encryptedText) {
     console.log("Encrypted text must not be empty!");
@@ -115,10 +129,7 @@ function decrypt(encryptedText, prime1, prime2) {
   const chars = [];
 
   for (const encryptedBlock of encryptedBlocks) {
-    const block = parseInt(
-      BigInt( BigInt(encryptedBlock) ** BigInt(privateKey) ) %
-        BigInt(publicKey)
-    );
+    const block = parseInt(powermod(BigInt(encryptedBlock), BigInt(privateKey), BigInt(publicKey)));
 
     const charCode = block === 99 ? block - 67 : block + 55;
     const char = String.fromCharCode(charCode);
@@ -131,5 +142,6 @@ function decrypt(encryptedText, prime1, prime2) {
   return text;
 }
 
-const { encryptedText, prime1, prime2 } = encrypt("A baTata esPalhA a RAma pelo CHao");
+const { encryptedText, prime1, prime2 } = encrypt("a BatATa esPalHa a RamA pelO chão");
+console.log(encryptedText, prime1, prime2);
 console.log(decrypt(encryptedText, prime1, prime2));
