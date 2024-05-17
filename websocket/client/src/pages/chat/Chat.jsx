@@ -3,29 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import SendLogo from "../../assets/send.svg";
 import useAutosizeTextArea from "../../hooks/useAutosizeTextArea";
 import { useNavigate, useParams } from "react-router-dom";
+import { generatePrimePairBetween } from "../../utils/rsa";
 
 const ADDRESS = "ws://localhost:8000";
 
-/**
- * @param {string} username 
- * @param {string} message 
- * @param {string} event 
- * @returns 
- */
-function checkEvent(username, message, event) {
-  switch (event) {
-    case "connection":
-      return { author: "", text: `${username} entrou no servidor.` };
-    case "close":
-      return { author: "", text: `${username} saiu do servidor.` };
-    default:
-      return { author: username, text: message };
-  }
-}
-
 export default function Chat() {
   const [text, setText] = useState("");
-  const [data, setData] = useState([]);
+  const [history, setHistory] = useState([]);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -36,9 +20,6 @@ export default function Chat() {
 
   useAutosizeTextArea(textAreaRef.current, text);
 
-  /**
-   * @param {Event} event 
-   */
   function handleSubmit(event) {
     if (!["keydown", "submit"].includes(event.type)) return;
     if (event.type === "keydown" && event.keyCode !== 13) return;
@@ -50,8 +31,9 @@ export default function Chat() {
       return;
     }
 
-    setText("");
+    setHistory((prevData) => [...prevData, { username, message: text }]);
     socketRef.current.send(text);
+    setText("");
   }
 
   function handleExit() {
@@ -64,16 +46,34 @@ export default function Chat() {
   useEffect(function createWebSocketConnection() {
     const ws = new WebSocket(`${ADDRESS}?username=${username}`);
 
-    ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
+    ws.onopen = () => {
+      const { prime1, prime2 } = generatePrimePairBetween(10, 100);
+      const publicKey = prime1 * prime2;
+      
+      ws.send(JSON.stringify({ username, publicKey }));
+      sessionStorage.setItem("privateKey", JSON.stringify({ prime1, prime2 }));
+    }
 
-      data.forEach(({ username, message, event }) => {
-        const newData = checkEvent(username, message, event);
-        setData((prevData) => [...prevData, newData]);
-      });
+    ws.onmessage = (e) => {
+      const { username, message, event } = JSON.parse(e.data);
+
+      if (event === "key") {
+        sessionStorage.setItem("publicKey", message);
+        return;
+      }
+
+      if (event === "close") {
+        alert(`O usuário ${username} se desconectou`);
+        setHistory([]);
+        return;
+      }
+
+      const newData = event === "connection" ? { message: `${username} se conectou` } : { username, message };
+      setHistory((prevData) => [...prevData, newData]);
     };
 
     ws.onclose = (e) => {
+      console.log(e);
       e.reason && alert(e.reason);
 
       navigate("/");
@@ -86,28 +86,35 @@ export default function Chat() {
 
   useEffect(function scrollMessages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [data]);
+  }, [history]);
 
   return (
     <div className={styles.main}>
       <h1 className={styles.title} onClick={handleExit}>Cryptowhats</h1>
 
       <div className={styles.messages}>
-        {data.map((data, index) => (
+        {history.map((data, index) => (
           <div
             className={styles.message}
             style={
+              data.username === username ?
               {
-                alignSelf: data.author === username ? "flex-end" : "flex-start",
-                backgroundColor: data.author === username ? "#dcf8c6" : "#f4f4f4",
-                borderBottomRightRadius: data.author === username ? "0" : "10px",
-                borderBottomLeftRadius: data.author === username ? "10px" : "0",
+                alignSelf: "flex-end",
+                backgroundColor: "#dcf8c6",
+                borderBottomRightRadius: "0",
+                borderBottomLeftRadius: "10px",
+              } :
+              {
+                alignSelf: "flex-start",
+                backgroundColor: "#f4f4f4",
+                borderBottomRightRadius: "10px",
+                borderBottomLeftRadius: "0",
               }
             }
             key={index}
           >
-            <div className={styles.messageTitle}>{data.author !== username ? data.author : "Você"}</div>
-            <div className={styles.messageInfo} style={{ fontStyle: !data.author && "italic" }}>{data.text}</div>
+            <div className={styles.messageTitle}>{data.username !== username ? data.username : "Você"}</div>
+            <div className={styles.messageInfo} style={{ fontStyle: !data.username && "italic" }}>{data.message}</div>
           </div>
         ))}
         <div ref={messagesEndRef} />
