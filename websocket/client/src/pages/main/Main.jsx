@@ -22,7 +22,7 @@ export default function Main() {
 
   return (
     <div className={styles.main}>
-      <h1 className={styles.title}>Cryptowhats</h1>
+      <h1 className={styles.title}>CryptoWhats</h1>
       <form className={styles.form} onSubmit={handleSubmit}>
         <input
           type="text"
