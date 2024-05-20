@@ -1,6 +1,7 @@
 import styles from "./Chat.module.css";
 import { useState, useEffect, useRef } from "react";
-import SendLogo from "../../assets/send.svg";
+import send from "../../assets/send.svg";
+import leave from "../../assets/leave.svg";
 import useAutosizeTextArea from "../../hooks/useAutosizeTextArea";
 import { useNavigate, useParams } from "react-router-dom";
 import { generatePrimePairBetween } from "../../utils/rsa";
@@ -13,7 +14,7 @@ export default function Chat() {
   const [text, setText] = useState("");
   const [history, setHistory] = useState([]);
   const [publicKey, setPublicKey] = useSessionStorage("publicKey");
-  const [privateKey, setPrivateKey] = useSessionStorage("privateKey");
+  const [, setPrivateKey] = useSessionStorage("privateKey");
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -36,15 +37,18 @@ export default function Chat() {
     }
 
     setHistory((prevData) => [...prevData, { username, message: text }]);
+    
     socketRef.current.send(text);
+   
     setText("");
   }
 
   function handleExit() {
-    if (confirm("Deseja sair do chat?")) {
-      alert("Obrigado por usar!");
-      navigate("/");
-    }
+    if (!confirm("Deseja sair do chat?"))
+      return;
+
+    alert("Obrigado por usar!");
+    navigate("/");
   }
 
   useEffect(function createWebSocketConnection() {
@@ -60,38 +64,33 @@ export default function Chat() {
 
     ws.onmessage = (e) => {
       const { username, message, event } = JSON.parse(e.data);
-
-      console.log(message);
-
-      if (event === "key") {
-        setPublicKey(message);
-        return;
-      }
-
-      if (event === "close") {
-        alert(`O usuário ${username} se desconectou, o chat será limpo.`);
-        setHistory([]);
-        setPrivateKey("");
-        setPublicKey("");
-        return;
-      }
-
       let newData = {};
 
-      if (event === "connection")
-        newData = { message: `${username} se conectou` };
-
-      if (event === "message") newData = { username, message };
+      switch (event) {
+        case "key":
+          setPublicKey(message);
+          return;
+        case "close":
+          setHistory([]);
+          setPublicKey("");
+          return;
+        case "connection":
+          newData = { message: `${username} se conectou` };
+          break;
+        default:
+          newData = { username, message };
+          break;
+      }
 
       setHistory((prevData) => [...prevData, newData]);
     };
 
     ws.onclose = (e) => {
-      console.log(e);
+      if (e.reason)
+        alert(e.reason);
 
-      if (e.reason) alert(e.reason);
-
-      if (e.code === 1008) navigate("/");
+      if (e.code === 1008)
+        navigate("/");
     };
 
     socketRef.current = ws;
@@ -103,36 +102,29 @@ export default function Chat() {
     };
   }, []);
 
-  useEffect(
-    function scrollMessages() {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    },
-    [history]
-  );
+  useEffect(function scrollMessages() {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [history]);
 
   if (!publicKey)
     return <Loader />;
 
   return (
     <div className={styles.main}>
-      <h1 className={styles.title} onClick={handleExit}>
-        Cryptowhats
-      </h1>
-
       <div className={styles.messages}>
+        <div className={styles.leaveChat}>
+          <img src={leave} alt="Sair" className={styles.logo} onClick={handleExit} />
+        </div>
         {history.map((data, index) => (
           <div
-            className={
-              styles.message + " " + (data.username === username ? styles.ownMessage : styles.othersMessage)
-            }
             key={index}
+            className={`${styles.message} ${data.username === username ? styles.ownMessage : styles.othersMessage}`}
           >
             <div className={styles.messageTitle}>
-              {data.username !== username ? data.username : "Você"}
+              {data.username === username ? "Você" : data.username}
             </div>
             <div
-              className={styles.messageInfo}
-              style={{ fontStyle: !data.username && "italic" }}
+              className={`${styles.messageInfo} ${!data.username && styles.eventMessage}`}
             >
               {data.message}
             </div>
@@ -155,7 +147,7 @@ export default function Chat() {
 
         <div className={styles.buttonArea}>
           <button type="submit" className={styles.textButton}>
-            <img src={SendLogo} alt="Enviar" />
+            <img src={send} alt="Enviar" className={styles.logo} />
           </button>
         </div>
       </form>

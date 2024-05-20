@@ -1,12 +1,12 @@
 .main {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   min-height: 100vh;
   flex-direction: column;
   background-color: var(--primary-color);
-  padding: 3rem 2rem;
-  gap: 3rem;
+  padding: 1rem 2rem;
+  overflow: hidden;
 }
 
 .title {
@@ -20,6 +20,7 @@
 
 .messages {
   overflow-y: scroll;
+  position: relative;
   height: 500px;
   width: 100%;
   background-color: rgb(122, 121, 121);
@@ -30,6 +31,14 @@
   margin: 0 3rem;
   border: none;
   border-radius: .5rem;
+}
+
+.leaveChat {
+  position: sticky;
+  width: max-content;
+  margin-left: auto;
+  /* right: 10px; */
+  top: 1px;
 }
 
 .messages::-webkit-scrollbar {
@@ -51,12 +60,15 @@
 
 .message {
   background-color: lightgray;
+  max-width: 75%;
   padding: 1rem;
   border: none;
   border-radius: .5rem;
   gap: .25rem;
   display: flex;
   flex-direction: column;
+  overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 .ownMessage {
@@ -83,6 +95,10 @@
   gap: .5rem;
 }
 
+.eventMessage {
+  font-style: italic;
+}
+
 .messageBox {
   width: 100%;
   display: flex;
@@ -103,7 +119,7 @@
   padding: 0 .5rem;
 }
 
-.messageBox img {
+.logo {
   width: 25px;
   cursor: pointer;
 }
