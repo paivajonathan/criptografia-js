@@ -49,3 +49,14 @@
   background-color: var(--secondary-color);
   transform: scale(1.05);
 }
+
+@media only screen and (max-width: 500px) {
+  .title {
+    font-size: 50px;
+  }
+
+  .usernameInput {
+    width: 100%;
+    font-size: 1rem;
+  }
+}

@@ -8,7 +8,7 @@ import { generatePrimePairBetween } from "../../utils/rsa";
 import useSessionStorage from "../../hooks/useSessionStorage";
 import Loader from "../../components/loader/Loader";
 
-const ADDRESS = "ws://localhost:8000";
+const ADDRESS = "ws://10.0.0.100:8000";
 
 export default function Chat() {
   const [text, setText] = useState("");
