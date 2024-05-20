@@ -59,6 +59,20 @@
   flex-direction: column;
 }
 
+.ownMessage {
+  align-self: flex-end;
+  background-color: #dcf8c6;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 10px;
+}
+
+.othersMessage {
+  align-self: flex-start;
+  background-color: #f4f4f4;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 0;
+}
+
 .messageTitle {
   font-weight: bold;
 }

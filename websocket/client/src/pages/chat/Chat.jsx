@@ -5,6 +5,7 @@ import useAutosizeTextArea from "../../hooks/useAutosizeTextArea";
 import { useNavigate, useParams } from "react-router-dom";
 import { generatePrimePairBetween } from "../../utils/rsa";
 import useSessionStorage from "../../hooks/useSessionStorage";
+import Loader from "../../components/loader/Loader";
 
 const ADDRESS = "ws://localhost:8000";
 
@@ -52,10 +53,10 @@ export default function Chat() {
     ws.onopen = () => {
       const { prime1, prime2 } = generatePrimePairBetween(10, 100);
       const publicKey = prime1 * prime2;
-      
+
       ws.send(JSON.stringify({ username, publicKey }));
       setPrivateKey(JSON.stringify({ prime1, prime2 }));
-    }
+    };
 
     ws.onmessage = (e) => {
       const { username, message, event } = JSON.parse(e.data);
@@ -75,19 +76,23 @@ export default function Chat() {
         return;
       }
 
-      const newData = event === "connection" ? { message: `${username} se conectou` } : { username, message };
+      let newData = {};
+
+      if (event === "connection")
+        newData = { message: `${username} se conectou` };
+
+      if (event === "message") newData = { username, message };
+
       setHistory((prevData) => [...prevData, newData]);
     };
 
     ws.onclose = (e) => {
       console.log(e);
 
-      if (e.reason)
-        alert(e.reason);
+      if (e.reason) alert(e.reason);
 
-      if (e.code === 1008)
-        navigate("/");
-    }
+      if (e.code === 1008) navigate("/");
+    };
 
     socketRef.current = ws;
 
@@ -95,44 +100,42 @@ export default function Chat() {
       ws.close();
       setPrivateKey("");
       setPublicKey("");
-    }
+    };
   }, []);
 
-  useEffect(function scrollMessages() {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [history]);
-
-  if (!publicKey) return (
-    <h1>Fuck you</h1>
+  useEffect(
+    function scrollMessages() {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    },
+    [history]
   );
+
+  if (!publicKey)
+    return <Loader />;
 
   return (
     <div className={styles.main}>
-      <h1 className={styles.title} onClick={handleExit}>Cryptowhats</h1>
+      <h1 className={styles.title} onClick={handleExit}>
+        Cryptowhats
+      </h1>
 
       <div className={styles.messages}>
         {history.map((data, index) => (
           <div
-            className={styles.message}
-            style={
-              data.username === username ?
-              {
-                alignSelf: "flex-end",
-                backgroundColor: "#dcf8c6",
-                borderBottomRightRadius: "0",
-                borderBottomLeftRadius: "10px",
-              } :
-              {
-                alignSelf: "flex-start",
-                backgroundColor: "#f4f4f4",
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "0",
-              }
+            className={
+              styles.message + " " + (data.username === username ? styles.ownMessage : styles.othersMessage)
             }
             key={index}
           >
-            <div className={styles.messageTitle}>{data.username !== username ? data.username : "Você"}</div>
-            <div className={styles.messageInfo} style={{ fontStyle: !data.username && "italic" }}>{data.message}</div>
+            <div className={styles.messageTitle}>
+              {data.username !== username ? data.username : "Você"}
+            </div>
+            <div
+              className={styles.messageInfo}
+              style={{ fontStyle: !data.username && "italic" }}
+            >
+              {data.message}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />

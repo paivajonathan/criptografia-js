@@ -1,0 +1,40 @@
+.main {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color);
+}
+
+.title {
+  font-size: 50px;
+  color: var(--title-color);
+  padding: 0 3rem;  
+}
+
+.title::after {
+  content: '';
+  animation: animateDots 2s infinite;
+}
+
+@keyframes animateDots {
+  0% {
+    content: '';
+  }
+
+  25% {
+    content: '.';
+  }
+
+  50% {
+    content: '..';
+  }
+
+  75% {
+    content: '...';
+  }
+
+  100% {
+    content: '';
+  }
+}
