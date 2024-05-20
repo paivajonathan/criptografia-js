@@ -4,12 +4,15 @@ import SendLogo from "../../assets/send.svg";
 import useAutosizeTextArea from "../../hooks/useAutosizeTextArea";
 import { useNavigate, useParams } from "react-router-dom";
 import { generatePrimePairBetween } from "../../utils/rsa";
+import useSessionStorage from "../../hooks/useSessionStorage";
 
 const ADDRESS = "ws://localhost:8000";
 
 export default function Chat() {
   const [text, setText] = useState("");
   const [history, setHistory] = useState([]);
+  const [publicKey, setPublicKey] = useSessionStorage("publicKey");
+  const [privateKey, setPrivateKey] = useSessionStorage("privateKey");
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -51,20 +54,24 @@ export default function Chat() {
       const publicKey = prime1 * prime2;
       
       ws.send(JSON.stringify({ username, publicKey }));
-      sessionStorage.setItem("privateKey", JSON.stringify({ prime1, prime2 }));
+      setPrivateKey(JSON.stringify({ prime1, prime2 }));
     }
 
     ws.onmessage = (e) => {
       const { username, message, event } = JSON.parse(e.data);
 
+      console.log(message);
+
       if (event === "key") {
-        sessionStorage.setItem("publicKey", message);
+        setPublicKey(message);
         return;
       }
 
       if (event === "close") {
-        alert(`O usuário ${username} se desconectou`);
+        alert(`O usuário ${username} se desconectou, o chat será limpo.`);
         setHistory([]);
+        setPrivateKey("");
+        setPublicKey("");
         return;
       }
 
@@ -74,19 +81,30 @@ export default function Chat() {
 
     ws.onclose = (e) => {
       console.log(e);
-      e.reason && alert(e.reason);
 
-      navigate("/");
+      if (e.reason)
+        alert(e.reason);
+
+      if (e.code === 1008)
+        navigate("/");
     }
 
     socketRef.current = ws;
 
-    return () => ws.close();
+    return () => {
+      ws.close();
+      setPrivateKey("");
+      setPublicKey("");
+    }
   }, []);
 
   useEffect(function scrollMessages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
+
+  if (!publicKey) return (
+    <h1>Fuck you</h1>
+  );
 
   return (
     <div className={styles.main}>
