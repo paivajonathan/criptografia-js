@@ -97,6 +97,7 @@ export default function Chat() {
 
     return () => {
       ws.close();
+      setHistory([]);
       setPrivateKey("");
       setPublicKey("");
     };
