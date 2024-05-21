@@ -4,17 +4,15 @@ import send from "../../assets/send.svg";
 import leave from "../../assets/leave.svg";
 import useAutosizeTextArea from "../../hooks/useAutosizeTextArea";
 import { useNavigate, useParams } from "react-router-dom";
-import { generatePrimePairBetween } from "../../utils/rsa";
-import useSessionStorage from "../../hooks/useSessionStorage";
+import { generatePrimePairBetween, encrypt, decrypt } from "../../utils/rsa";
 import Loader from "../../components/loader/Loader";
 
-const ADDRESS = "ws://10.0.0.100:8000";
+const ADDRESS = "ws://localhost:8000";
 
 export default function Chat() {
   const [text, setText] = useState("");
   const [history, setHistory] = useState([]);
-  const [publicKey, setPublicKey] = useSessionStorage("publicKey");
-  const [, setPrivateKey] = useSessionStorage("privateKey");
+  const [isUserOnline, setisUserOnline] = useState(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -37,9 +35,13 @@ export default function Chat() {
     }
 
     setHistory((prevData) => [...prevData, { username, message: text }]);
+
+    const key = JSON.parse(sessionStorage.getItem("publicKey"));
+    const keyValue = key[Object.keys(key)[0]];
+    const encryptedMessage = encrypt(text, keyValue);
     
-    socketRef.current.send(text);
-   
+    socketRef.current.send(encryptedMessage);
+
     setText("");
   }
 
@@ -59,7 +61,7 @@ export default function Chat() {
       const publicKey = prime1 * prime2;
 
       ws.send(JSON.stringify({ username, publicKey }));
-      setPrivateKey(JSON.stringify({ prime1, prime2 }));
+      sessionStorage.setItem("privateKey", JSON.stringify({ prime1, prime2 }));
     };
 
     ws.onmessage = (e) => {
@@ -68,17 +70,21 @@ export default function Chat() {
 
       switch (event) {
         case "key":
-          setPublicKey(message);
+          sessionStorage.setItem("publicKey", message);
+          setisUserOnline(true);
           return;
         case "close":
           setHistory([]);
-          setPublicKey("");
+          setisUserOnline(false);
+          sessionStorage.removeItem("publicKey");
           return;
         case "connection":
           newData = { message: `${username} se conectou` };
           break;
         default:
-          newData = { username, message };
+          const { prime1, prime2 } = JSON.parse(sessionStorage.getItem("privateKey"));
+          const decryptedMessage = decrypt(message, prime1, prime2);
+          newData = { username, message: decryptedMessage };
           break;
       }
 
@@ -98,8 +104,8 @@ export default function Chat() {
     return () => {
       ws.close();
       setHistory([]);
-      setPrivateKey("");
-      setPublicKey("");
+      sessionStorage.removeItem("privateKey");
+      sessionStorage.removeItem("publicKey");
     };
   }, []);
 
@@ -107,7 +113,7 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
 
-  if (!publicKey)
+  if (!isUserOnline)
     return <Loader />;
 
   return (
