@@ -15,7 +15,7 @@ export default function Chat() {
   const { username } = useParams();
   const navigate = useNavigate();
 
-  const { history, isUserOnline, sendMessage } = useWebSocket(username);
+  const { history, userCount, sendMessage } = useWebSocket(username);
 
   useAutosizeTextArea(textAreaRef, text);
 
@@ -46,7 +46,7 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
 
-  if (!isUserOnline)
+  if (!userCount)
     return <Loader />;
 
   return (

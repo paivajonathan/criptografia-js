@@ -5,7 +5,7 @@ import { setItem, deleteItem, getItem } from "../utils/sessionStorage";
 
 export default function useWebSocket(username) {
   const [history, setHistory] = useState([]);
-  const [isUserOnline, setisUserOnline] = useState(false);
+  const [userCount, setUserCount] = useState(0);
   const socketRef = useRef(null);
   const navigate = useNavigate();
 
@@ -17,27 +17,36 @@ export default function useWebSocket(username) {
     ws.onopen = () => {
       const { publicKey, privateKey } = generateKeys();
       setItem("privateKey", privateKey);
-      ws.send(JSON.stringify({ username, publicKey }));
+      ws.send(JSON.stringify({ username, message: publicKey, event: "key" }));
     };
 
     ws.onmessage = (wsEvent) => {
       const { username: msgUsername, message, event } = JSON.parse(wsEvent.data);
       let newData = {};
+      console.log(wsEvent.data);
 
       if (event === "key") {
         setItem("publicKey", message);
-        setisUserOnline(true);
+        
+        const currentUserCount = Object.keys(getItem("publicKey") ?? {}).length;
+        
+        setUserCount(currentUserCount);
+
+        if (!currentUserCount) {
+          setHistory([]);
+          deleteItem("publicKey");
+        }
+        
         return;
       }
 
       if (event === "close") {
-        setHistory([]);
-        setisUserOnline(false);
-        deleteItem("publicKey");
+        setUserCount(userCount - 1);
         return;
       }
 
       if (event === "connection") {
+        setUserCount(userCount + 1);
         newData = { message: `${msgUsername} entrou no chat.` };
       }
 
@@ -72,15 +81,16 @@ export default function useWebSocket(username) {
   }, [username, navigate]);
 
   const sendMessage = (text) => {
-    const publicKey = getItem("publicKey");
+    const publicKeys = getItem("publicKey");
     
-    const firstAttribute = Object.keys(publicKey)[0];
-    const publicKeyValue = publicKey[firstAttribute];
-    const encryptedMessage = encryptMessage(text, publicKeyValue);
-        
-    socketRef.current.send(encryptedMessage);
     setHistory((prevData) => [...prevData, { username, message: text }]);
+    
+    for (const publicKeyUsername of Object.keys(publicKeys)) {
+      const publicKey = publicKeys[publicKeyUsername];
+      const encryptedMessage = encryptMessage(text, publicKey);
+      socketRef.current.send(JSON.stringify({ username, message: encryptedMessage, event: "message", destination: publicKeyUsername}));
+    }    
   };
 
-  return { history, isUserOnline, sendMessage };
+  return { history, userCount, sendMessage };
 }

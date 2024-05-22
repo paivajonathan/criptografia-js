@@ -28,6 +28,31 @@ function isJSON(text) {
   }
 }
 
+function broadcastKeys() {
+  Object.keys(connections).forEach((connUsername) => {
+    const filteredKeys = Object.keys(publicKeys)
+      .filter(
+        (publicKeyUsername) => ![connUsername].includes(publicKeyUsername)
+      )
+      .reduce((publicKey, publicKeyUsername) => {
+        publicKey[publicKeyUsername] = publicKeys[publicKeyUsername];
+        return publicKey;
+      }, {});
+
+    // if (!Object.keys(filteredKeys).length) return;
+
+    const connection = connections[connUsername];
+
+    connection.send(
+      JSON.stringify({
+        username: "server",
+        message: filteredKeys,
+        event: "key",
+      })
+    );
+  });
+}
+
 function broadcast(connections, username, event, message = "") {
   console.log(`${username} - ${message} - ${event}`);
 
@@ -42,10 +67,10 @@ function broadcast(connections, username, event, message = "") {
 }
 
 wsServer.on("connection", (connection, request) => {
-  if (Object.keys(connections).length >= MAX_CONNECTIONS) {
-    connection.close(1008, "Foi excedido o limite de conexões!");
-    return;
-  }
+  // if (Object.keys(connections).length >= MAX_CONNECTIONS) {
+  //   connection.close(1008, "Foi excedido o limite de conexões!");
+  //   return;
+  // }
 
   const username = url.parse(request.url, true).query.username;
 
@@ -57,49 +82,32 @@ wsServer.on("connection", (connection, request) => {
   connections[username] = connection;
   broadcast(connections, username, "connection");
 
-  connection.on("message", (message) => {
-    if (isJSON(message.toString())) {
-      const { username, publicKey } = JSON.parse(message.toString());
-      publicKeys[username] = publicKey;
+  connection.on("message", (bytes) => {
+    const { username: messageUsername, message, event, destination } = JSON.parse(bytes.toString());
+
+    if (event === "key") {
+      publicKeys[messageUsername] = message;
+      broadcastKeys();
+    } else if (event === "message") {
+      if (Object.keys(connections).length < 2) {
+        connection.close(1000, "Espere algum outro usuário se conectar!");
+        return;
+      }
 
       Object.keys(connections).forEach((connUsername) => {
-        const filteredKeys = Object.keys(publicKeys)
-          .filter(
-            (publicKeyUsername) => ![connUsername].includes(publicKeyUsername)
-          )
-          .reduce((publicKey, publicKeyUsername) => {
-            publicKey[publicKeyUsername] = publicKeys[publicKeyUsername];
-            return publicKey;
-          }, {});
-
-        if (!Object.keys(filteredKeys).length) return;
-
+        if (destination !== connUsername) return;
+        console.log([username, message, event, destination].join(" - "));
         const connection = connections[connUsername];
-
-        connection.send(
-          JSON.stringify({
-            username: "server",
-            message: filteredKeys,
-            event: "key",
-          })
-        );
-      });
-
-      return;
+        connection.send(JSON.stringify({ username, message, event }));
+      })
     }
-
-    if (Object.keys(connections).length < 2) {
-      connection.close(1000, "Espere algum outro usuário se conectar!");
-      return;
-    }
-
-    broadcast(connections, username, "message", message.toString());
   });
 
   connection.on("close", () => {
     broadcast(connections, username, "close");
     delete connections[username];
     delete publicKeys[username];
+    broadcastKeys();
   });
 });
 
