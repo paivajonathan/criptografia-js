@@ -11,8 +11,14 @@ const MAX_CONNECTIONS = 2;
 const connections = {};
 const publicKeys = {};
 
+function isNumeric(str) {
+  if (typeof str != "string") return false
+  return !isNaN(str) &&
+         !isNaN(parseFloat(str))
+}
+
 function isJSON(text) {
-  if (typeof text !== "string") return false;
+  if (typeof text !== "string" || isNumeric(text)) return false;
 
   try {
     JSON.parse(text);
@@ -73,7 +79,7 @@ wsServer.on("connection", (connection, request) => {
         connection.send(
           JSON.stringify({
             username: "server",
-            message: JSON.stringify(filteredKeys),
+            message: filteredKeys,
             event: "key",
           })
         );

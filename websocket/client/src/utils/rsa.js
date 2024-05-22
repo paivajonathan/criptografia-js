@@ -38,6 +38,24 @@ function generatePrimePairBetween(minValue, maxValue) {
   return { prime1, prime2 };
 }
 
+function powermod(base, exp, p) {
+  base = BigInt(base);
+  exp = BigInt(exp);
+  p = BigInt(p);
+  
+  let result = 1n;
+  
+  while (exp !== 0n) {
+    if (exp % 2n === 1n)
+      result = result * base % p;
+    
+    base = base * base % p;
+    exp >>= 1n;
+  }
+  
+  return parseInt(result);
+}
+
 function encrypt(text, publicKey) {
   if (!text) {
     console.log("Text must not be empty!");
@@ -50,7 +68,7 @@ function encrypt(text, publicKey) {
     const charCode = char.charCodeAt(0);
     const block = char === " " ? charCode + 67 : charCode - 55;
     
-    const encryptedBlock = (block ** 3) % publicKey;
+    const encryptedBlock = powermod(block, 3, publicKey);
     
     encryptedBlocks.push(encryptedBlock);
   }
@@ -66,20 +84,6 @@ function getInverse(number, mod) {
       return i;
   }
   return -1;
-}
-
-function powermod(base, exp, p) {
-  let result = 1n;
-  
-  while (exp !== 0n) {
-    if (exp % 2n === 1n)
-      result = result * base % p;
-    
-    base = base * base % p;
-    exp >>= 1n;
-  }
-  
-  return result;
 }
 
 function isPrime(number) {
@@ -123,7 +127,7 @@ function decrypt(encryptedText, prime1, prime2) {
   const chars = [];
 
   for (const encryptedBlock of encryptedBlocks) {
-    const block = parseInt(BigInt(encryptedBlock) ** BigInt(privateKey) % BigInt(publicKey));
+    const block = powermod(encryptedBlock, privateKey, publicKey);
 
     const charCode = block === 99 ? block - 67 : block + 55;
     const char = String.fromCharCode(charCode);
@@ -132,7 +136,6 @@ function decrypt(encryptedText, prime1, prime2) {
   }
 
   const text = chars.join("");
-  console.log(text);
   
   return text;
 }
