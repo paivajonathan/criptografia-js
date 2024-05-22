@@ -1,5 +1,4 @@
 function setItem(key, value) {
-  console.log(key, value);
   sessionStorage.setItem(key, JSON.stringify(value));
 }
 
