@@ -90,5 +90,5 @@ wsServer.on("connection", (connection, request) => {
 });
 
 server.listen(port, () => {
-  console.log(`O servidor está rodando na ${port}!`);
+  console.log(`O servidor está rodando na porta ${port}!`);
 });
