@@ -6,9 +6,6 @@ export default function Main() {
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
-  /**
-   * @param {Event} event 
-   */
   function handleSubmit(event) {
     event.preventDefault();
     

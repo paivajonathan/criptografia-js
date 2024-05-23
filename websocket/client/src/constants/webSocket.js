@@ -1,0 +1,5 @@
+const POLICY_VIOLATION_CODE = 1008;
+
+export {
+  POLICY_VIOLATION_CODE,
+};

@@ -2,16 +2,30 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import useEncryption from "./useEncryption";
 import { setItem, deleteItem, getItem } from "../utils/sessionStorage";
+import { POLICY_VIOLATION_CODE } from "../constants/webSocket";
 
 export default function useWebSocket(username) {
   const [history, setHistory] = useState([]);
   const [userCount, setUserCount] = useState(0);
+  
   const socketRef = useRef(null);
+  
   const navigate = useNavigate();
 
   const { generateKeys, encryptMessage, decryptMessage } = useEncryption();
 
-  useEffect(() => {
+  function refreshUserCount() {
+    const users = Object.keys(getItem("publicKeys") ?? {});
+    const count = users.length;
+    setUserCount(count);
+    
+    if (!count) {
+      setHistory([]);
+      deleteItem("publicKeys");
+    }
+  }
+
+  useEffect(function createConnection() {
     const ws = new WebSocket(`${process.env.REACT_APP_WEBSOCKET_ADDRESS}?username=${username}`);
 
     ws.onopen = () => {
@@ -23,34 +37,20 @@ export default function useWebSocket(username) {
     ws.onmessage = (wsEvent) => {
       const { username: msgUsername, message, event } = JSON.parse(wsEvent.data);
       let newData = {};
-      console.log(wsEvent.data);
 
       if (event === "key") {
-        setItem("publicKey", message);
-        
-        const currentUserCount = Object.keys(getItem("publicKey") ?? {}).length;
-        
-        setUserCount(currentUserCount);
-
-        if (!currentUserCount) {
-          setHistory([]);
-          deleteItem("publicKey");
-        }
-        
+        setItem("publicKeys", message);
+        refreshUserCount();
         return;
       }
 
       if (event === "close") {
-        setUserCount(userCount - 1);
-        return;
-      }
-
-      if (event === "connection") {
-        setUserCount(userCount + 1);
+        refreshUserCount();
+        newData = { message: `${msgUsername} saiu do chat.` };
+      } else if (event === "connection") {
+        refreshUserCount();
         newData = { message: `${msgUsername} entrou no chat.` };
-      }
-
-      if (event === "message") {
+      } else if (event === "message") {
         const privateKey = getItem("privateKey");
         const decryptedMessage = decryptMessage(message, privateKey);
         newData = { username: msgUsername, message: decryptedMessage };
@@ -60,8 +60,6 @@ export default function useWebSocket(username) {
     };
 
     ws.onclose = (wsEvent) => {
-      const POLICY_VIOLATION_CODE = 1008;
-
       if (wsEvent.reason)
         alert(wsEvent.reason);
 
@@ -75,20 +73,26 @@ export default function useWebSocket(username) {
       ws.close();
       setHistory([]);
       deleteItem("privateKey");
-      deleteItem("publicKey");
+      deleteItem("publicKeys");
     };
   
   }, [username, navigate]);
 
-  const sendMessage = (text) => {
-    const publicKeys = getItem("publicKey");
+  function sendMessage(text) {
+    const publicKeys = getItem("publicKeys");
+    const users = Object.keys(publicKeys);
     
     setHistory((prevData) => [...prevData, { username, message: text }]);
     
-    for (const publicKeyUsername of Object.keys(publicKeys)) {
-      const publicKey = publicKeys[publicKeyUsername];
+    for (const user of users) {
+      const publicKey = publicKeys[user];
       const encryptedMessage = encryptMessage(text, publicKey);
-      socketRef.current.send(JSON.stringify({ username, message: encryptedMessage, event: "message", destination: publicKeyUsername}));
+      socketRef.current.send(JSON.stringify({
+        username,
+        message: encryptedMessage,
+        event: "message",
+        destination: user,
+      }));
     }    
   };
 
