@@ -24,7 +24,7 @@
   position: relative;
   height: 500px;
   width: 100%;
-  background-color: rgb(122, 121, 121);
+  background-color: #444;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -38,7 +38,6 @@
   position: sticky;
   width: max-content;
   margin-left: auto;
-  /* right: 10px; */
   top: 1px;
 }
 

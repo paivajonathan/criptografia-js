@@ -38,15 +38,15 @@
 .submitButton {
   width: 150px;
   height: 50px;
+  background-color: var(--secondary-color);
   border: none;
   border-radius: .25rem;
-  font-size: 1rem;
+  font-size: 1.25rem;
   transition: transform ease-in-out 100ms, background-color ease-in-out 100ms;
 }
 
 .submitButton:hover {
   cursor: pointer;
-  background-color: var(--secondary-color);
   transform: scale(1.05);
 }
 

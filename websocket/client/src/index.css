@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
 :root {
-  --primary-color: gray;
-  --secondary-color: lightgray;
+  --primary-color: #333;
+  --secondary-color: #F4F4F4;
   --title-size: 75px;
   --title-color: white;
 }
