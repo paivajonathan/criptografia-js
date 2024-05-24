@@ -62,20 +62,43 @@ function encrypt(text, publicKey) {
     return;
   }
 
-  const encryptedBlocks = [];
+  let preEncryptedText = "";
 
   for (const char of text) {
-    const charCode = char.charCodeAt(0);
-    const block = char === " " ? charCode + 67 : charCode - 55;
+    const code = char.charCodeAt(0) + 100;
+    preEncryptedText += code;
+  }
+
+  let blocks = [];
+  
+  while (preEncryptedText !== "") {
+    const textLength = preEncryptedText.length;
+    const maxBlock = textLength >= 3 ? 3 : textLength;
+    const sliceEnd = Math.floor(Math.random() * maxBlock) + 1;
     
+    let displacement = 0;
+    
+    if (preEncryptedText[sliceEnd] === "0") {
+      displacement++;
+      
+      if (preEncryptedText[sliceEnd + 1] === "0")
+        displacement++;
+    }
+
+    let slice = preEncryptedText.slice(0, sliceEnd + displacement);
+    preEncryptedText = preEncryptedText.slice(sliceEnd + displacement, textLength);
+    
+    blocks.push(slice);
+  }
+  
+  const encryptedBlocks = [];
+
+  for (const block of blocks) {
     const encryptedBlock = powermod(block, 3, publicKey);
-    
     encryptedBlocks.push(encryptedBlock);
   }
 
-  const encryptedText = encryptedBlocks.join(" ");
-
-  return encryptedText;
+  return encryptedBlocks.join(" ");
 }
 
 function getInverse(number, mod) {
@@ -124,20 +147,28 @@ function decrypt(encryptedText, prime1, prime2) {
   }
 
   const encryptedBlocks = encryptedText.split(" ").map(Number);
-  const chars = [];
+  let preEncryptedText = ""; 
 
   for (const encryptedBlock of encryptedBlocks) {
     const block = powermod(encryptedBlock, privateKey, publicKey);
-
-    const charCode = block === 99 ? block - 67 : block + 55;
-    const char = String.fromCharCode(charCode);
-    
-    chars.push(char);
+    preEncryptedText += block;
   }
 
-  const text = chars.join("");
+  let text = "";
+  
+  while (preEncryptedText !== "") {
+    const code = parseInt(preEncryptedText.slice(0, 3));
+    text += String.fromCharCode(code - 100);
+    preEncryptedText = preEncryptedText.slice(3, preEncryptedText.length);
+  }
   
   return text;
 }
+
+const { prime1,  prime2} = generatePrimePairBetween(100, 500);
+console.log(prime1, prime2);
+const encryptedText = encrypt("a batata espalha a rama pelo chão", prime1 * prime2);
+console.log(encryptedText);
+console.log(decrypt(encryptedText, prime1, prime2));
 
 export { generatePrimePairBetween, encrypt, decrypt };
