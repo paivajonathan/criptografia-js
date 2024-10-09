@@ -165,10 +165,4 @@ function decrypt(encryptedText, prime1, prime2) {
   return text;
 }
 
-const { prime1,  prime2} = generatePrimePairBetween(100, 500);
-console.log(prime1, prime2);
-const encryptedText = encrypt("a batata espalha a rama pelo chão", prime1 * prime2);
-console.log(encryptedText);
-console.log(decrypt(encryptedText, prime1, prime2));
-
 export { generatePrimePairBetween, encrypt, decrypt };
